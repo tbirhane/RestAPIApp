@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,16 +34,19 @@ public class DataService {
         }
     }
 
-    public void save(List<DataDto> dataDtos) throws InterruptedException {
+
+    public void save(List<DataDto> dataDtos)  {
+        List<Data> list = new ArrayList<>();
         for(DataDto dataDto: dataDtos) {
             if (dataDto != null) {
                 ValueDto valueDto = dataDto.getValue();
                 Value value = valueDto != null ? new Value(valueDto.getId(), valueDto.getQuote()) : null;
                 Data data = new Data(dataDto.getType(), value);
                 if (data != null && value != null)
-                    dataRepo.save(data);
-                Thread.sleep(500);
+                    list.add(data);
             }
+            Iterable<Data> iterable = list;
+            dataRepo.saveAll(iterable);
         }
     }
 
